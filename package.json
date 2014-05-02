@@ -1,7 +1,12 @@
 {
-  "name" : "socket-service",
-  "version" : "0.0.1",
-  "dependencies" : {
-    "mongoqueue" : "git+ssh://git@github.com/cl-tford/mongoqueue.git"
+  "name": "socket-service",
+  "version": "0.0.1",
+  "dependencies": {
+    "mongoqueue": "git+ssh://git@github.com/cl-tford/mongoqueue.git",
+    "classify-js": "~0.10.4"
+  },
+  "devDependencies": {
+    "mocha": "~1.18.2",
+    "chai": "~1.9.1"
   }
 }
