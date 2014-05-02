@@ -1,0 +1,7 @@
+{
+  "name" : "socket-service",
+  "version" : "0.0.1",
+  "dependencies" : {
+    "mongoqueue" : "git+ssh://git@github.com/cl-tford/mongoqueue.git"
+  }
+}
