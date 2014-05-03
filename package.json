@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "dependencies": {
     "mongoqueue": "git+ssh://git@github.com/cl-tford/mongoqueue.git",
-    "classify-js": "~0.10.4"
+    "classify-js": "~0.10.4",
+    "pubnub": "~3.6.2",
+    "hapi": "~4.1.0",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "mocha": "~1.18.2",
