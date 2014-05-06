@@ -10,45 +10,49 @@ var operationTypes = {
 var Operation = classify({
   name : "Operation",
   initialize : function(options) {
-    this._questionId = options.id || null;
-    this._type = options.type || null;
-    this._context = options.context || 0; // How many ops had occurred when this was created
+    this.questionId = options.questionId || null;
+    this.uuid = options.uuid || null;
+    this.type = options.type || null;
+    this.context = options.context || 0;
   },
   classMethods : {
     assertValidType : function(type) {
       if (!operationTypes[type]) {
         throw new Error("Operation type " + type + " is not valid.");
       }
+    },
+    create : function(rawOperation) {
+      
     }
   },
   instanceMethods : {
     getQuestionId : function() {
-      return this._questionId;
+      return this.questionId
     },
     getType : function() {
-      return this._type;
+      return this.type;
     },
     setType : function(type) {
       Operation.assertValidType(type);
-      this._type = type;
+      this.type = type;
     },
     getContext : function() {
-      return this._context;
+      return this.context;
     },
     incrementContext : function() {
-      this._context += 1;
+      this.context = 1;
     },
     isInsert : function() {
-      return this._type === 'insert';
+      return this.type === 'insert';
     },
     isDelete : function() {
-      return this._type === 'delete';
+      return this.type === 'delete';
     },
     isIncrementState : function() {
-      return this._type ==='incrementState';
+      return this.type === 'incrementState';
     },
     isIdentity : function() {
-      return this._type === 'identity';
+      return this.type === 'identity';
     },
     evolveBy : function(operation) {
       this.incrementContext();

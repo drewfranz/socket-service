@@ -19,7 +19,9 @@ var IncrementState = classify({
     evolveByIncrementState : function(incrementStateOp) {
       if (incrementStateOp.getQuestionId() === this.getQuestionId()) {
         return new Identity({
-          context : this.getContext()
+          context : this.getContext(),
+          uuid    : this.uuid,
+          questionId : this.questionId
         });
       }
     }
