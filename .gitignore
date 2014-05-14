@@ -1,0 +1,11 @@
+node_modules
+artifacts
+coverage
+
+# various tmp files
+.DS_Store
+.svn
+*~
+*.swp
+*.rbc
+

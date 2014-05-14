@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "mongoqueue": "git+ssh://git@github.com/cl-tford/mongoqueue.git",
+    "confit": "git+ssh://git@github.com/creativelive/confit.git#Questions-V1",
     "classify-js": "~0.10.4",
     "hapi": "~4.1.0",
     "underscore": "~1.6.0",

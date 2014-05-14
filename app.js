@@ -2,10 +2,14 @@ var Hapi       = require('hapi');
 var MongoQueue = require('mongoqueue');
 var Context    = require('./question/context');
 var _          = require('underscore');
+var confit     = require('confit').vendors.pubnub;
+var env        = process.env.NODE_ENV || 'dev';
 
-var pubnub = require('./pubnub-client').init({
-  publish_key  : 'pub-c-1ebc54b7-0670-4a6a-add2-86bc3a11ea20',
-  subscribe_key: 'sub-c-086a2e4e-d173-11e3-8170-02ee2ddab7fe'
+var pubnubConfig = confit.get('/', {env: env});
+
+var pubnub = require('pubnub').init({
+  publish_key  : pubnubConfig.publish_key,
+  subscribe_key: pubnubConfig.subscribe_key
 });
 
 var port = 3050;
