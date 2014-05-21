@@ -1,16 +1,5 @@
-var Hapi       = require('hapi');
-var MongoQueue = require('mongoqueue');
-var Context    = require('./question/context');
-var _          = require('underscore');
-var confit     = require('confit').vendors.pubnub;
-var env        = process.env.NODE_ENV || 'dev';
-
-var pubnubConfig = confit.get('/', {env: env});
-
-var pubnub = require('pubnub').init({
-  publish_key  : pubnubConfig.publish_key,
-  subscribe_key: pubnubConfig.subscribe_key
-});
+var Hapi = require('hapi');
+var queueProcessor = require('./lib/queueprocessor');
 
 var port = 3050;
 
@@ -22,117 +11,31 @@ var options = {
 
 var server = new Hapi.Server('0.0.0.0', port, options);
 
-var mongoQueue = new MongoQueue({
-  collectionName : 'questionops',
-  criteria       : {
-    course : 'course1'
-  }
-});
-
-var context = new Context({
-  collectionName : 'questionopcontexts',
-  criteria : {
-    course : 'course1'
-  }
-});
-
-function processQueuedOperation(queuedOperation, callback) {
-  context.evolveOperation(queuedOperation, function(err, evolvedOperation) {
-    if (err) {
-      return callback(err);
-    }
-    context.storeOperation(evolvedOperation, callback);
-  });
-}
-
-function broadcastQuestionOp(questionOp) {
-  pubnub.publish({
-    channel : 'course1-question-operations',
-    message : JSON.stringify(questionOp),
-    callback : function(e) { console.log("SUCCESS!", e); },
-    error    : function(e) { console.log("FAILED! RETRY PUBLISH!", e); }
-  });
-}
-
-function processQueue() {
-  mongoQueue.checkQueue(function(err, queuedOperation) {
-    if (err) {
-      console.log("There was an error checking the Queue!\n");
-      return null;
-    }
-    if (!queuedOperation) {
-      return null; // Queue is done, for now.
-    }
-    console.log("Inside processQueue, I'm processing queuedOperation:\n", queuedOperation);
-    processQueuedOperation(queuedOperation, function(err, processedOperation) {
-      if (err) {
-        console.log("There was an error processing the queuedOperation:!\n", queuedOperation);
-      } else {
-        broadcastQuestionOp(processedOperation);
-        mongoQueue.dequeue(function(err) {
-          if (err) {
-            console.log("There was an error dequeueing :\n", queuedOperation);
-          }
-          processQueue();
-        });
-      }
-    });
-    /*
-      setTimeout(function() {
-      console.log("Still processing queuedQuestionOp:\n", queueTop);
-      setTimeout(function() {
-      mongoQueue.dequeue(function(err) {
-          if (err) {
-          console.log("There was an error dequeueing :\n", queueTop);
-          }
-          console.log("Done processing queuedQuestionOp:\n", queueTop);
-          broadcastQuestionOp(queueTop);
-          processQueue();          
-          });
-          }, 3000);
-          }, 3000);
-    */
-    //  });}
-  });
-}
-
-function enqueueQuestionOperation(questionOp, callback) {
-  mongoQueue.enqueue(questionOp, function(err, newLength) {
-    if (err) {
-      return callback(err);
-    }
-    if (newLength === 1) { // First element in queue.
-      processQueue();
-    } else {
-      console.log("Inside enqueueQuestionOperation, don't think I need to do anything\n");
-    }
-    callback(null);
-  });
-}
-
-function handleQuestionOperation(request, reply) {
-var questionOperation = request.payload;
-
-  console.log("Handling a question op\n");
-  enqueueQuestionOperation(questionOperation, function(err) {
-    if (err) {
-      return reply(Hapi.error.internal(err));
-    }
-    reply('{ "queued" : "your-request" }');
-  });
-}
-
-
 server.route([
   {
     method : "POST", path : "/questions",
     config : {
-      handler : handleQuestionOperation
+      handler : function(request, reply) {
+        var rawOperation = request.payload;
+
+        queueProcessor.queueOperation(rawOperation, reply);
+      }
+    }
+  },
+  {
+    method : "GET", path : "/questions/context",
+    config : {
+      handler : function(request, reply) {
+        var rawJSON = request.query.payload;
+        var rawOperation = JSON.parse(rawJSON);
+
+        queueProcessor.queueOperation(rawOperation, reply); 
+      }
     }
   }
 ]);
 
-processQueue();
+queueProcessor.processQueue();
 
 server.start(function() {
   console.log("Socket service started on port " + port);
