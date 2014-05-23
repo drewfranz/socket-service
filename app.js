@@ -35,8 +35,6 @@ server.route([
   }
 ]);
 
-queueProcessor.processQueue();
-
 server.start(function() {
   console.log("Socket service started on port " + port);
 });
